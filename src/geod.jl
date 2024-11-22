@@ -321,3 +321,33 @@ function geod_polygonarea(
 end
 
 # TODO: add geod_polygon_addpoint, geod_polygon_addedge, geod_polygon_testedge, geod_polygon_testpoint
+
+# ## GeoInterface wrappers
+# What follows are GeoInterface-based wrappers so it's easy to pass through points.  
+# ### geod_direct
+geod_direct(point, azi::Real, s12::Real; geodesic = geod_geodesic(6378137, 1/298/257223563)) = geod_direct(GeoInterface.geomtrait(point), point, azi, s12; geodesic)
+function geod_direct(::GeoInterface.PointTrait, point, azi, s12; geodesic = geod_geodesic(6378137, 1/298/257223563))
+    return geod_direct(geodesic, GeoInterface.y(p1), GeoInterface.x(p1), azi, s2)
+end
+# ### geod_inverse
+geod_inverse(p1, p2; geodesic = geod_geodesic(6378137, 1/298/257223563)) = geod_inverse(GeoInterface.geomtrait(p1), GeoInterface.geomtrait(p2), p1, p2; geodesic)
+function geod_inverse(::GeoInterface.PointTrait, ::GeoInterface.PointTrait, p1, p2; geodesic = geod_geodesic(6378137, 1/298/257223563))
+    return geod_inverse(geodesic, GeoInterface.y(p1), GeoInterface.x(p1), GeoInterface.y(p2), GeoInterface.x(p2))
+end
+# ### geod_directline
+geod_directline(point, azi::Real, s12::Real, caps::Cuint = UInt32(0); geodesic = geod_geodesic(6378137, 1/298/257223563)) = geod_directline(GeoInterface.geomtrait(point), point, azi, s12, caps; geodesic)
+function geod_directline(::GeoInterface.PointTrait, point, azi, s12, caps::Cuint = UInt32(0); geodesic = geod_geodesic(6378137, 1/298/257223563))
+    return geod_directline(geodesic, GeoInterface.y(p1), GeoInterface.x(p1), azi, s2, caps)
+end
+# ### geod_inverseline
+geod_inverseline(p1, p2, caps::Cuint = UInt32(0); geodesic = geod_geodesic(6378137, 1/298/257223563)) = geod_inverse(GeoInterface.geomtrait(p1), GeoInterface.geomtrait(p2), p1, p2, caps; geodesic)
+function geod_inverse(::GeoInterface.PointTrait, ::GeoInterface.PointTrait, p1, p2, caps::Cuint = UInt32(0); geodesic = geod_geodesic(6378137, 1/298/257223563))
+    return geod_inverse(geodesic, GeoInterface.y(p1), GeoInterface.x(p1), GeoInterface.y(p2), GeoInterface.x(p2), caps)
+end
+# ### geod_path
+function geod_path(p1, p2, npoints = 1000; geodesic = geod_geodesic(6378137, 1/298/257223563), caps = UInt32(0))
+    geod_path(GeoInterface.geomtrait(p1), GeoInterface.geomtrait(p2), p1, p2, npoints; geodesic, caps)
+end
+function geod_path(::GeoInterface.PointTrait, ::GeoInterface.PointTrait, p1, p2, npoints = 1000; geodesic = geod_geodesic(6378137, 1/298/257223563), caps = UInt32(0))
+    geod_path(geodesic, GeoInterface.y(p1), GeoInterface.x(p1), GeoInterface.y(p2), GeoInterface.x(p2), npoints; caps)
+end
